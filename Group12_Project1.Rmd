@@ -1,0 +1,215 @@
+---
+title: "Group12 - Project1"
+author: "Hitesh Prabhu, Zack Bilderback, Michael Lundy, Nicole Erich"
+date: "February 7, 2017"
+output: html_document
+---
+
+```{r echo=FALSE}
+library(knitr)
+```
+
+## Question 1: 
+First, formulate the dedicated portfolio construction problem.
+
+####Decision Variables:
+$$x_1, x_2, \dots, x_{10}$$
+
+Where $x_n$ is the number of bonds of type $n$ to purchase at time $t=0$.
+
+
+
+####Objective: 
+$$\textrm{min} \quad 102x_1+99x_2+101x_3+98x_4+98x_5+104x_6+100x_7+101x_8+102x_9+94x_{10}$$
+
+####Subject To:
+
+$$
+\begin{aligned}
+105x_1+3.5x_2+5x_3+3.5x_4+4x_5+9x_6+6x_7+8x_8+9x_9+7x_{10} = 12000 \\
+0x_1+103.5x_2+105x_3+3.5x_4+4x_5+9x_6+6x_7+8x_8+9x_9+7x_{10} = 18000 \\
+0x_1+0x_2+0x_3+103.5x_4+4x_5+9x_6+6x_7+8x_8+9x_9+7x_{10} = 20000 \\
+0x_1+0x_2+0x_3+0x_4+104x_5+9x_6+6x_7+8x_8+9x_9+7x_{10} = 20000 \\
+0x_1+0x_2+0x_3+0x_4+0x_5+109x_6+106x_7+8x_8+9x_9+7x_{10} = 16000 \\
+0x_1+0x_2+0x_3+0x_4+0x_5+0x_6+0x_7+108x_8+9x_9+7x_{10} = 15000 \\
+0x_1+0x_2+0x_3+0x_4+0x_5+0x_6+0x_7+0x_8+109x_9+7x_{10} = 12000 \\
+0x_1+0x_2+0x_3+0x_4+0x_5+0x_6+0x_7+0x_8+0x_9+107x_{10} = 10000 \\
+x_i \ge 0
+\end{aligned}
+$$
+
+## Question 2:
+Solve the test case using R.
+
+```{r results="hide", warning=FALSE}
+library(lpSolveAPI)
+
+# Create an LP model with 0 constraints 10 decision variables
+modLP<-make.lp(0,10)
+
+# Set objective coefficients
+set.objfn(modLP, c(102,99,101,98,98,104,100,101,102,94))
+
+# Set objective direction
+lp.control(modLP,sense='min')
+
+# Add constraints
+add.constraint(modLP,c(105,3.5,5,3.5,4,9,6,8,9,7), ">=",12000)
+add.constraint(modLP,c(0,103.5,105,3.5,4,9,6,8,9,7), ">=",18000)
+add.constraint(modLP,c(0,0,0,103.5,4,9,6,8,9,7), ">=",20000)
+add.constraint(modLP,c(0,0,0,0,104,9,6,8,9,7), ">=",20000)
+add.constraint(modLP,c(0,0,0,0,0,109,106,8,9,7), ">=",16000)
+add.constraint(modLP,c(0,0,0,0,0,0,0,108,9,7), ">=",15000)
+add.constraint(modLP,c(0,0,0,0,0,0,0,0,109,7), ">=",12000)
+add.constraint(modLP,c(0,0,0,0,0,0,0,0,0,107), ">=",10000)
+
+# Rename variables and constraints
+varNames <- c("X1","X2","X3","X4","X5","X6","X7","X8","X9","X10")
+constraintNames <- c("Year1","Year2","Year3","Year4","Year5","Year6","Year7","Year8")
+dimnames(modLP) <- list(constraintNames, varNames)
+```
+
+```{r}
+# Finding 0 is successfully finding an optimal solution
+solve(modLP)
+
+# Show the obptimal solution value and variables
+optimal = paste("$",formatC(get.objective(modLP),format="f",digits=2,big.mark=","))
+print(optimal)
+
+vars = round(get.variables(modLP),2)
+matrix(data=c(varNames,vars),nrow=2,ncol=10,byrow=TRUE)
+```
+
+
+This solution is very close to the provided solution: 63 of bond1, 126 of bond3, 152 of bond4, 157 of bond5, 124 of bond6, 125 of bond8, 105 of bond9, and 94 of bond10.
+
+## Question 3:
+
+Code for the function called dedicate\_g12.m is available as a separate file, named dedicate_g12.R.
+
+```{r echo=FALSE}
+dedicate_g12.m <- function(P, C, M, L) {
+  # create an LP model with 0 constraints (we will add constraints later) 
+  # and N decision variables - for N different bond prices
+  pcLP <- make.lp(0,length(P))
+  
+  # set objective coefficients
+  set.objfn(pcLP, P)
+  
+  # set objective direction
+  lp.control(pcLP,sense = 'min')
+  
+  # add the constraints
+  for (i in 1:length(L)) {
+    expectedInflow <- (!(M < i))*C + (M == i)*100
+    # print(expectedInflow)
+    add.constraint(pcLP, expectedInflow, "=", L[i])
+  }
+  
+  # label the constraints and variables
+  varNames = c()
+  for (i in 1:length(P)) {
+    varNames[i] <- paste("Bond",i)
+  }
+  
+  constraintNames = c()
+  for (i in 1:length(L)) {
+    constraintNames[i] <- paste("Year",i)
+  }
+  dimnames(pcLP) <- list(constraintNames, varNames)
+  
+  # solve the model, if this return 0 an optimal solution is found
+  solve(pcLP)
+  
+  # this return the proposed solution
+  get.variables(pcLP)
+  
+}
+```
+
+By running the code below, we test the function.
+
+
+```{r}
+# ----------
+# Test Case
+# ----------
+
+# Input vectors
+
+# Prices P
+P <- c(102, 99, 101, 98, 98, 104, 100, 101, 102, 94)
+
+# Coupon Rates C
+C <- c(5, 3.5, 5, 3.5, 4, 9, 6, 8, 9, 7)
+
+# Maturity M 
+M <- c(1, 2, 2, 3, 4, 5, 5, 6, 7, 8)
+
+# Liabilities for time t => L
+L <- c(12, 18, 20, 20, 16, 15, 12 ,10)*1000
+
+# Function Call and view results
+vars = round(dedicate_g12.m(P, C, M, L),2)
+matrix(data=c(varNames,vars),nrow=2,ncol=10,byrow=TRUE)
+```
+
+
+We obtain the same results as the manual method in question 2. 
+
+## Question 4:
+Finally, construct a dedicated portfolio using this liability stream and the current bond information from the Wall Street Journal (WSJ) Online U.S. Treasury Quotes.
+
+We first saved the bonds from the website into an Excel spreadsheet named "Bonds.xlsx". We then used the following code to format the dates and select only bonds that will mature at the semi-annual periods (6/30 or 12/31) throughout the timeframe of 2017-2022.
+
+```{r results="hide", warning=FALSE}
+# Read in bond information and store as data frame
+library(readxl)
+bonds = read_excel("Bonds.xlsx")
+bonds$Maturity <- as.Date(bonds$Maturity)
+
+
+# Limit bonds dataframe to only those that mature/pay coupons at the end of June/December
+dates = as.Date(c("2017-06-30","2017-12-31","2018-06-30","2018-12-31","2019-06-30","2019-12-31","2020-06-30","2020-12-31","2021-06-30","2021-12-31","2022-06-30","2022-12-31"))
+bonds = bonds[bonds$Maturity %in% dates,]
+
+# Price Vector
+P = bonds$Asked
+
+# Coupon Vector
+C = bonds$Coupon/2
+
+# Maturities Vector (in periods/half-years)
+## Assign each date to period number
+periods = seq_along(dates)
+names(periods) = dates
+
+## Initialize maturities vector with zeros
+M = rep(0,length(bonds$Maturity))
+
+## Add period number corresponding to each maturity date to maturities vector
+for (i in seq_along(M)){
+  date = toString(bonds$Maturity[i])
+  period = periods[date]
+  
+  M[i] = period
+}
+
+# Liabilities for time t => L
+L = c(9,9,10,10,6,6,9,9,10,10,5,3)*1000000
+```
+
+```{r}
+# Function Call
+vars = dedicate_g12.m(P, C, M, L)
+
+# Map back to bonds
+results = bonds[,c('Maturity','Coupon','Asked')]
+results$Amount = vars
+
+# Print as a table
+kable(results, digits=2)
+```
+
+The "Amount" column above is the number of bonds of each type that we recommend purchasing at time $t=0$ to create a portfolio to finance the liabilities stream.
