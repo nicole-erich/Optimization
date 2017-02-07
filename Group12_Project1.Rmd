@@ -123,7 +123,10 @@ dedicate_g12.m <- function(P, C, M, L) {
   solve(pcLP)
   
   # this return the proposed solution
-  get.variables(pcLP)
+  #get.variables(pcLP)
+  
+  # return the entire model so we can perform calculations
+  return(pcLP)
   
 }
 ```
@@ -151,7 +154,8 @@ M <- c(1, 2, 2, 3, 4, 5, 5, 6, 7, 8)
 L <- c(12, 18, 20, 20, 16, 15, 12 ,10)*1000
 
 # Function Call and view results
-vars = round(dedicate_g12.m(P, C, M, L),2)
+model = dedicate_g12.m(P, C, M, L)
+vars = round(get.variables(model),2)
 matrix(data=c(varNames,vars),nrow=2,ncol=10,byrow=TRUE)
 ```
 
@@ -170,17 +174,17 @@ bonds = read_excel("Bonds.xlsx")
 bonds$Maturity <- as.Date(bonds$Maturity)
 
 
-# Limit bonds dataframe to only those that mature/pay coupons at the end of June/December
+# Filter dataframe to only contain bonds that mature/pay coupons at the specified liability dates
 dates = as.Date(c("2017-06-30","2017-12-31","2018-06-30","2018-12-31","2019-06-30","2019-12-31","2020-06-30","2020-12-31","2021-06-30","2021-12-31","2022-06-30","2022-12-31"))
 bonds = bonds[bonds$Maturity %in% dates,]
 
-# Price Vector
+# Prices
 P = bonds$Asked
 
-# Coupon Vector
+# Coupons
 C = bonds$Coupon/2
 
-# Maturities Vector (in periods/half-years)
+# Maturities (in periods/half-years)
 ## Assign each date to period number
 periods = seq_along(dates)
 names(periods) = dates
@@ -202,14 +206,22 @@ L = c(9,9,10,10,6,6,9,9,10,10,5,3)*1000000
 
 ```{r}
 # Function Call
-vars = dedicate_g12.m(P, C, M, L)
+model = dedicate_g12.m(P, C, M, L)
 
 # Map back to bonds
 results = bonds[,c('Maturity','Coupon','Asked')]
-results$Amount = vars
+results$Amount = get.variables(model)
 
 # Print as a table
 kable(results, digits=2)
 ```
 
 The "Amount" column above is the number of bonds of each type that we recommend purchasing at time $t=0$ to create a portfolio to finance the liabilities stream.
+
+```{r}
+# get.sensitivity.rhs returns three list of duals, we want the first list and only the first twelve which correspond to the liability constraints
+duals = get.sensitivity.rhs(model)[[1]][1:12]
+plot(dates, duals)
+```
+
+The duals here represent the time value of money at the time the portfolio was constructed. As time moves forward, the value of money decreases which is intuitive because a dollar today is worth more than a dollar tomorrow. This is why we see the decline in the duals. 
