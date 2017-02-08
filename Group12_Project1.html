@@ -176,9 +176,9 @@ add.constraint(modLP,c(0,0,0,0,0,0,0,0,109,7), &quot;&gt;=&quot;,12000)
 add.constraint(modLP,c(0,0,0,0,0,0,0,0,0,107), &quot;&gt;=&quot;,10000)
 
 # Rename variables and constraints
-varNames &lt;- c(&quot;X1&quot;,&quot;X2&quot;,&quot;X3&quot;,&quot;X4&quot;,&quot;X5&quot;,&quot;X6&quot;,&quot;X7&quot;,&quot;X8&quot;,&quot;X9&quot;,&quot;X10&quot;)
-constraintNames &lt;- c(&quot;Year1&quot;,&quot;Year2&quot;,&quot;Year3&quot;,&quot;Year4&quot;,&quot;Year5&quot;,&quot;Year6&quot;,&quot;Year7&quot;,&quot;Year8&quot;)
-dimnames(modLP) &lt;- list(constraintNames, varNames)</code></pre>
+varNames = c(&quot;X1&quot;,&quot;X2&quot;,&quot;X3&quot;,&quot;X4&quot;,&quot;X5&quot;,&quot;X6&quot;,&quot;X7&quot;,&quot;X8&quot;,&quot;X9&quot;,&quot;X10&quot;)
+constraintNames = c(&quot;Year1&quot;,&quot;Year2&quot;,&quot;Year3&quot;,&quot;Year4&quot;,&quot;Year5&quot;,&quot;Year6&quot;,&quot;Year7&quot;,&quot;Year8&quot;)
+dimnames(modLP) = list(constraintNames, varNames)</code></pre>
 <pre class="r"><code># Finding 0 is successfully finding an optimal solution
 solve(modLP)</code></pre>
 <pre><code>## [1] 0</code></pre>
@@ -186,14 +186,44 @@ solve(modLP)</code></pre>
 optimal = paste(&quot;$&quot;,formatC(get.objective(modLP),format=&quot;f&quot;,digits=2,big.mark=&quot;,&quot;))
 print(optimal)</code></pre>
 <pre><code>## [1] &quot;$ 93,944.50&quot;</code></pre>
-<pre class="r"><code>vars = round(get.variables(modLP),2)
-matrix(data=c(varNames,vars),nrow=2,ncol=10,byrow=TRUE)</code></pre>
-<pre><code>##      [,1]    [,2] [,3]     [,4]     [,5]     [,6]     [,7] [,8]    
-## [1,] &quot;X1&quot;    &quot;X2&quot; &quot;X3&quot;     &quot;X4&quot;     &quot;X5&quot;     &quot;X6&quot;     &quot;X7&quot; &quot;X8&quot;    
-## [2,] &quot;62.14&quot; &quot;0&quot;  &quot;125.24&quot; &quot;151.51&quot; &quot;156.81&quot; &quot;123.08&quot; &quot;0&quot;  &quot;124.16&quot;
-##      [,9]     [,10]  
-## [1,] &quot;X9&quot;     &quot;X10&quot;  
-## [2,] &quot;104.09&quot; &quot;93.46&quot;</code></pre>
+<pre class="r"><code># Display results in a formatted table
+vars = round(get.variables(modLP),2)
+vars_matrix = matrix(data=vars,nrow=1,ncol=10)
+colnames(vars_matrix) = varNames
+rownames(vars_matrix) = c(&quot;Bond Qty&quot;)
+kable(vars_matrix)</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left"></th>
+<th align="right">X1</th>
+<th align="right">X2</th>
+<th align="right">X3</th>
+<th align="right">X4</th>
+<th align="right">X5</th>
+<th align="right">X6</th>
+<th align="right">X7</th>
+<th align="right">X8</th>
+<th align="right">X9</th>
+<th align="right">X10</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Bond Qty</td>
+<td align="right">62.14</td>
+<td align="right">0</td>
+<td align="right">125.24</td>
+<td align="right">151.51</td>
+<td align="right">156.81</td>
+<td align="right">123.08</td>
+<td align="right">0</td>
+<td align="right">124.16</td>
+<td align="right">104.09</td>
+<td align="right">93.46</td>
+</tr>
+</tbody>
+</table>
 <p>This solution is very close to the provided solution: 63 of bond1, 126 of bond3, 152 of bond4, 157 of bond5, 124 of bond6, 125 of bond8, 105 of bond9, and 94 of bond10.</p>
 </div>
 <div id="question-3" class="section level2">
@@ -225,15 +255,44 @@ model = dedicate_g12.m(P, C, M, L)
 optimal = paste(&quot;$&quot;,formatC(get.objective(model),format=&quot;f&quot;,digits=2,big.mark=&quot;,&quot;))
 print(optimal)</code></pre>
 <pre><code>## [1] &quot;$ 93,944.50&quot;</code></pre>
-<pre class="r"><code># Show optimal variables
+<pre class="r"><code># Show optimal variables in a formatted table
 vars = round(get.variables(model),2)
-matrix(data=c(varNames,vars),nrow=2,ncol=10,byrow=TRUE)</code></pre>
-<pre><code>##      [,1]    [,2] [,3]     [,4]     [,5]     [,6]     [,7] [,8]    
-## [1,] &quot;X1&quot;    &quot;X2&quot; &quot;X3&quot;     &quot;X4&quot;     &quot;X5&quot;     &quot;X6&quot;     &quot;X7&quot; &quot;X8&quot;    
-## [2,] &quot;62.14&quot; &quot;0&quot;  &quot;125.24&quot; &quot;151.51&quot; &quot;156.81&quot; &quot;123.08&quot; &quot;0&quot;  &quot;124.16&quot;
-##      [,9]     [,10]  
-## [1,] &quot;X9&quot;     &quot;X10&quot;  
-## [2,] &quot;104.09&quot; &quot;93.46&quot;</code></pre>
+vars_matrix = matrix(data=vars,nrow=1,ncol=10)
+colnames(vars_matrix) = varNames
+rownames(vars_matrix) = c(&quot;Bond Qty&quot;)
+kable(vars_matrix)</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left"></th>
+<th align="right">X1</th>
+<th align="right">X2</th>
+<th align="right">X3</th>
+<th align="right">X4</th>
+<th align="right">X5</th>
+<th align="right">X6</th>
+<th align="right">X7</th>
+<th align="right">X8</th>
+<th align="right">X9</th>
+<th align="right">X10</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Bond Qty</td>
+<td align="right">62.14</td>
+<td align="right">0</td>
+<td align="right">125.24</td>
+<td align="right">151.51</td>
+<td align="right">156.81</td>
+<td align="right">123.08</td>
+<td align="right">0</td>
+<td align="right">124.16</td>
+<td align="right">104.09</td>
+<td align="right">93.46</td>
+</tr>
+</tbody>
+</table>
 <p>We obtain the same results as the manual method in question 2.</p>
 </div>
 <div id="question-4" class="section level2">
@@ -487,7 +546,92 @@ kable(results, digits=2)</code></pre>
 duals = get.sensitivity.rhs(model)[[1]][1:12]
 plot(dates, duals)</code></pre>
 <p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABUAAAAPACAMAAADDuCPrAAAAXVBMVEUAAAAAADoAAGYAOpAAZmYAZpAAZrY6AAA6kJA6kLY6kNtmAABmAGZmtv+QOgCQkNuQtpCQ29uQ2/+2ZgC2/7a2///bkDrbtmbb/7bb////tmb/25D//7b//9v////mHOMcAAAACXBIWXMAAB2HAAAdhwGP5fFlAAAgAElEQVR4nO3djXbaSLSgUdKZiec648xMuM2d4MTv/5gX/SCEwQQdCpUO3nutXnYIpsu2+CKhUrF6AyBkVXsAAFkJKECQgAIECShAkIACBAkoQJCAAgQJKECQgAIECShAkIACBAkoQJCAAgQJKECQgAIECShAkIACBAkoQJCAAgQJKECQgAIECShAkIACBAkoQJCAAgQJKECQgAIECShAkIACBAkoQJCAAgQJKECQgAIECShAkIACBAkoQJCAAgQJKECQgAIECShAkIACBAkoQJCAAgQJKECQgAIECShAkIACBAkoQJCAAgQJKECQgAIECShAkIACBAkoQJCAAgQJKECQgAIECShAkIACBAkoQJCAAgQJKECQgAIECShAkIACBAkoQJCAAgQJKECQgAIECShAkIACBAkoQJCAAgQJKECQgAIECShAkIACBAkoQJCAAgQJKECQgAIECShAkIACBAkoQJCAAgQJKECQgAIECShAkIACBAkoQJCAAgQJKECQgAIECShAkIACBAkoQJCAAgQJKECQgAIECShAkIACBAkoQJCAAgQJKECQgAIECShAkIACBAkoQJCAAgQJKECQgAIECShAkIACBAkoQJCAAgQJKECQgAIECShAkIACBAkoQJCAAgQJKECQgAIECShAkIACBAkoQJCAAgQJKECQgAIECShAkIACBAkoQJCAAgQJKECQgAIECShAkIACBAkoQJCAAgQJKECQgAIECShAkIACBAkoQJCAAgQJKECQgAIECShAkIACBAkoQJCAAgQJKECQgAIECShAkIACBC07oCuAYsonqvgjFlT7pw08luKNKv2AJd3hHwzg0xJQgCABBQgSUIAgAQUIElCAIAEFCBJQgCABBQgSUIAgAQUIElCAIAEFCBJQgCABPXuv+yxUBTwWAT13JwUFriCgZ+6zevcJwDkCenqX1eHTuw4GSE5AL91FQYELBPTSXQQUuEBAL91F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" width="672" /></p>
-<p>The duals here represent the time value of money at the time the portfolio was constructed. As time moves forward, the value of money decreases which is intuitive because a dollar today is worth more than a dollar tomorrow. This is why we see the decline in the duals.</p>
+<p>The duals here represent the time value of money at the time the portfolio was constructed. As time moves forward, the value of money decreases. This is intuitive because a dollar today is worth more than a dollar tomorrow. This is why we see the decline in the duals.</p>
+<pre class="r"><code># Get sensitivity ranges for each dual of the first twelve liability constraints
+sens = get.sensitivity.rhs(model)[2:3]
+sens_matrix = matrix(data=c(sens$dualsfrom,sens$dualstill),nrow=length(sens$dualsfrom),ncol=2)
+sens_matrix = sens_matrix[1:12,]
+colnames(sens_matrix) = c(&quot;Duals From&quot;,&quot;Duals To&quot;)
+
+rows = c(&quot;&quot;,12)
+for(i in 1:12){
+  rows[i] = paste(&quot;Liability Constraint &quot;,i)
+}
+
+rownames(sens_matrix) = rows
+kable(sens_matrix)</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left"></th>
+<th align="right">Duals From</th>
+<th align="right">Duals To</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Liability Constraint 1</td>
+<td align="right">844181.92</td>
+<td align="right">1.000000e+30</td>
+</tr>
+<tr class="even">
+<td align="left">Liability Constraint 2</td>
+<td align="right">732039.42</td>
+<td align="right">6.103062e+08</td>
+</tr>
+<tr class="odd">
+<td align="left">Liability Constraint 3</td>
+<td align="right">621982.39</td>
+<td align="right">7.145173e+08</td>
+</tr>
+<tr class="even">
+<td align="left">Liability Constraint 4</td>
+<td align="right">551647.26</td>
+<td align="right">1.133852e+09</td>
+</tr>
+<tr class="odd">
+<td align="left">Liability Constraint 5</td>
+<td align="right">507379.39</td>
+<td align="right">1.051831e+09</td>
+</tr>
+<tr class="even">
+<td align="left">Liability Constraint 6</td>
+<td align="right">462751.85</td>
+<td align="right">6.875075e+08</td>
+</tr>
+<tr class="odd">
+<td align="left">Liability Constraint 7</td>
+<td align="right">393386.71</td>
+<td align="right">6.960447e+08</td>
+</tr>
+<tr class="even">
+<td align="left">Liability Constraint 8</td>
+<td align="right">291183.17</td>
+<td align="right">4.846655e+08</td>
+</tr>
+<tr class="odd">
+<td align="left">Liability Constraint 9</td>
+<td align="right">188026.99</td>
+<td align="right">5.472746e+08</td>
+</tr>
+<tr class="even">
+<td align="left">Liability Constraint 10</td>
+<td align="right">83774.78</td>
+<td align="right">5.529832e+08</td>
+</tr>
+<tr class="odd">
+<td align="left">Liability Constraint 11</td>
+<td align="right">31539.89</td>
+<td align="right">5.537524e+08</td>
+</tr>
+<tr class="even">
+<td align="left">Liability Constraint 12</td>
+<td align="right">0.00</td>
+<td align="right">4.755882e+08</td>
+</tr>
+</tbody>
+</table>
+<p>We can interpret the “duals from” and “duals to” values as the applicable range for the duals of each constraint. For example, for Liability Constraint 2, we found the dual to be approximately .990. This is only true if the libaility due on 12/31/2017 stays between $732,039.42 and $610,306,200. These are fairly wide ranges, so as liabilities change throughout the project planning process, the firm’s internal interest rates will stay fairly stable.</p>
 </div>
 
 
