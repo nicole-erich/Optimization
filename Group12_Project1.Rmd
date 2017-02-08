@@ -64,9 +64,9 @@ add.constraint(modLP,c(0,0,0,0,0,0,0,0,109,7), ">=",12000)
 add.constraint(modLP,c(0,0,0,0,0,0,0,0,0,107), ">=",10000)
 
 # Rename variables and constraints
-varNames <- c("X1","X2","X3","X4","X5","X6","X7","X8","X9","X10")
-constraintNames <- c("Year1","Year2","Year3","Year4","Year5","Year6","Year7","Year8")
-dimnames(modLP) <- list(constraintNames, varNames)
+varNames = c("X1","X2","X3","X4","X5","X6","X7","X8","X9","X10")
+constraintNames = c("Year1","Year2","Year3","Year4","Year5","Year6","Year7","Year8")
+dimnames(modLP) = list(constraintNames, varNames)
 ```
 
 ```{r}
@@ -77,8 +77,12 @@ solve(modLP)
 optimal = paste("$",formatC(get.objective(modLP),format="f",digits=2,big.mark=","))
 print(optimal)
 
+# Display results in a formatted table
 vars = round(get.variables(modLP),2)
-matrix(data=c(varNames,vars),nrow=2,ncol=10,byrow=TRUE)
+vars_matrix = matrix(data=vars,nrow=1,ncol=10)
+colnames(vars_matrix) = varNames
+rownames(vars_matrix) = c("Bond Qty")
+kable(vars_matrix)
 ```
 
 
@@ -158,9 +162,13 @@ model = dedicate_g12.m(P, C, M, L)
 optimal = paste("$",formatC(get.objective(model),format="f",digits=2,big.mark=","))
 print(optimal)
 
-# Show optimal variables
+# Show optimal variables in a formatted table
 vars = round(get.variables(model),2)
-matrix(data=c(varNames,vars),nrow=2,ncol=10,byrow=TRUE)
+vars_matrix = matrix(data=vars,nrow=1,ncol=10)
+colnames(vars_matrix) = varNames
+rownames(vars_matrix) = c("Bond Qty")
+kable(vars_matrix)
+
 ```
 
 
@@ -233,3 +241,21 @@ plot(dates, duals)
 ```
 
 The duals here represent the time value of money at the time the portfolio was constructed. As time moves forward, the value of money decreases. This is intuitive because a dollar today is worth more than a dollar tomorrow. This is why we see the decline in the duals. 
+
+```{r}
+# Get sensitivity ranges for each dual of the first twelve liability constraints
+sens = get.sensitivity.rhs(model)[2:3]
+sens_matrix = matrix(data=c(sens$dualsfrom,sens$dualstill),nrow=length(sens$dualsfrom),ncol=2)
+sens_matrix = sens_matrix[1:12,]
+colnames(sens_matrix) = c("Duals From","Duals To")
+
+rows = c("",12)
+for(i in 1:12){
+  rows[i] = paste("Liability Constraint ",i)
+}
+
+rownames(sens_matrix) = rows
+kable(sens_matrix)
+```
+
+We can interpret the "duals from" and "duals to" values as the applicable range for the duals of each constraint. For example, for Liability Constraint 2, we found the dual to be approximately .990. This is only true if the libaility due on 12/31/2017 stays between   $732,039.42 and $610,306,200. These are fairly wide ranges, so as liabilities change throughout the project planning process, the firm's internal interest rates will stay fairly stable.
