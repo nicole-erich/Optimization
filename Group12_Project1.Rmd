@@ -73,7 +73,7 @@ dimnames(modLP) <- list(constraintNames, varNames)
 # Finding 0 is successfully finding an optimal solution
 solve(modLP)
 
-# Show the obptimal solution value and variables
+# Show the optimal solution value and variables
 optimal = paste("$",formatC(get.objective(modLP),format="f",digits=2,big.mark=","))
 print(optimal)
 
@@ -122,8 +122,6 @@ dedicate_g12.m <- function(P, C, M, L) {
   # solve the model, if this return 0 an optimal solution is found
   solve(pcLP)
   
-  # this return the proposed solution
-  #get.variables(pcLP)
   
   # return the entire model so we can perform calculations
   return(pcLP)
@@ -153,8 +151,14 @@ M <- c(1, 2, 2, 3, 4, 5, 5, 6, 7, 8)
 # Liabilities for time t => L
 L <- c(12, 18, 20, 20, 16, 15, 12 ,10)*1000
 
-# Function Call and view results
+# Function Call
 model = dedicate_g12.m(P, C, M, L)
+
+# Show the optimal solution value
+optimal = paste("$",formatC(get.objective(model),format="f",digits=2,big.mark=","))
+print(optimal)
+
+# Show optimal variables
 vars = round(get.variables(model),2)
 matrix(data=c(varNames,vars),nrow=2,ncol=10,byrow=TRUE)
 ```
@@ -208,6 +212,10 @@ L = c(9,9,10,10,6,6,9,9,10,10,5,3)*1000000
 # Function Call
 model = dedicate_g12.m(P, C, M, L)
 
+# Show the optimal solution value
+optimal = paste("$",formatC(get.objective(model),format="f",digits=2,big.mark=","))
+print(optimal)
+
 # Map back to bonds
 results = bonds[,c('Maturity','Coupon','Asked')]
 results$Amount = get.variables(model)
@@ -224,4 +232,4 @@ duals = get.sensitivity.rhs(model)[[1]][1:12]
 plot(dates, duals)
 ```
 
-The duals here represent the time value of money at the time the portfolio was constructed. As time moves forward, the value of money decreases which is intuitive because a dollar today is worth more than a dollar tomorrow. This is why we see the decline in the duals. 
+The duals here represent the time value of money at the time the portfolio was constructed. As time moves forward, the value of money decreases. This is intuitive because a dollar today is worth more than a dollar tomorrow. This is why we see the decline in the duals. 
